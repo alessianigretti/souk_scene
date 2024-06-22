@@ -6,9 +6,9 @@
 FPostProcessSettings UPostProcessingFunctionLibrary::MakeSettingsWithFocalLength(float FocalLength)
 {
 	FPostProcessSettings Settings;
-	Settings.DepthOfFieldFstop = 3.0f;
+	Settings.DepthOfFieldFstop = 5.0f;
 	Settings.DepthOfFieldSensorWidth = 160.0f;
-	Settings.DepthOfFieldFocalDistance = FocalLength;
+	Settings.DepthOfFieldFocalDistance = FocalLength + 10.f;
 	Settings.bOverride_DepthOfFieldFstop = true;
 	Settings.bOverride_DepthOfFieldSensorWidth = true;
 	Settings.bOverride_DepthOfFieldFocalDistance = true;
