@@ -5,20 +5,20 @@
 
 UFiniteStateMachineTaskBase::UFiniteStateMachineTaskBase()
 {
-	Owner = Cast<AActor>(GetOuter()->GetOuter());
+	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 }
 
-void UFiniteStateMachineTaskBase::RunLogic_Implementation()
+void UFiniteStateMachineTaskBase::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
 {
-	bIsRunning = true;
-
 	if (GEngine)
 	{
 		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, GetName());
 	}
+
+	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 }
 
-void UFiniteStateMachineTaskBase::EndTask_Implementation()
+void UFiniteStateMachineTaskBase::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, bool bReplicateEndAbility, bool bWasCancelled)
 {
-	bIsRunning = false;
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 }

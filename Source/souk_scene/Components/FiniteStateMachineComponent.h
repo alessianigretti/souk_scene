@@ -5,7 +5,21 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "FiniteStateMachineTaskBase.h"
+#include "GameplayTagContainer.h"
 #include "FiniteStateMachineComponent.generated.h"
+
+class UAbilitySystemComponent;
+
+USTRUCT(BlueprintType)
+struct FLinkedTasks
+{
+	GENERATED_BODY()
+
+public:
+
+	UPROPERTY(EditAnywhere)
+	TArray<TSubclassOf<UFiniteStateMachineTaskBase>> LinkedTasks;
+};
 
 UCLASS(Blueprintable, ClassGroup=(Souk), meta=(BlueprintSpawnableComponent))
 class SOUK_SCENE_API UFiniteStateMachineComponent : public UActorComponent
@@ -17,15 +31,12 @@ public:
 	UFiniteStateMachineComponent();
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
-		
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TSubclassOf<UFiniteStateMachineTaskBase>> AllowedTasks;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TArray<TSubclassOf<UFiniteStateMachineConditionBase>> AllowedConditions;
+	UPROPERTY(EditAnywhere)
+	TMap<TSubclassOf<UFiniteStateMachineTaskBase>, FLinkedTasks> Graph;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	TSubclassOf<UFiniteStateMachineTaskBase> RootTask;
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UFiniteStateMachineTaskBase> StartTask;
 
 protected:
 
@@ -34,9 +45,8 @@ protected:
 	UPROPERTY()
 	UFiniteStateMachineTaskBase* CurrentTask;
 
-	UPROPERTY()
-	TMap<UClass*, UFiniteStateMachineTaskBase*> Tasks;
+private:
 
 	UPROPERTY()
-	TMap<UClass*, UFiniteStateMachineConditionBase*> Conditions;
+	UAbilitySystemComponent* AbilitySystemComponent;
 };

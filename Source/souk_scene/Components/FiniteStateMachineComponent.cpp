@@ -2,6 +2,7 @@
 
 
 #include "FiniteStateMachineComponent.h"
+#include "AbilitySystemComponent.h"
 #include "FiniteStateMachineConditionBase.h"
 
 UFiniteStateMachineComponent::UFiniteStateMachineComponent()
@@ -13,20 +14,31 @@ void UFiniteStateMachineComponent::TickComponent(float DeltaTime, ELevelTick Tic
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (CurrentTask->bIsRunning)
+	if (!CurrentTask || CurrentTask->IsActive())
 	{
 		return;
 	}
 
-	for (int i = 0; i < CurrentTask->Conditions.Num(); i++)
+	TArray<TSubclassOf<UFiniteStateMachineTaskBase>> LinkedTasks = Graph.Find(CurrentTask->GetClass())->LinkedTasks;
+
+	for (int i = 0; i < LinkedTasks.Num(); i++)
 	{
-		UFiniteStateMachineConditionBase* ConditionPtr = Conditions.FindRef(CurrentTask->Conditions[i].Get());
-		if (ConditionPtr->IsConditionMet() && ConditionPtr->Task.Get() != CurrentTask->GetClass())
+		for (auto ActivatableAbility : AbilitySystemComponent->GetActivatableAbilities())
 		{
-			CurrentTask = Tasks.FindRef(ConditionPtr->Task.Get());
-			CurrentTask->RunLogic();
-			break;
+			if (ActivatableAbility.Ability == LinkedTasks[i].GetDefaultObject())
+			{
+				if (ActivatableAbility.Ability->CanActivateAbility(ActivatableAbility.Handle, AbilitySystemComponent->AbilityActorInfo.Get())
+					&& ActivatableAbility.Ability->GetClass() != CurrentTask->GetClass())
+				{
+					if (AbilitySystemComponent->TryActivateAbilityByClass(LinkedTasks[i], false))
+					{
+						CurrentTask = Cast<UFiniteStateMachineTaskBase>(ActivatableAbility.Ability);
+						break;
+					}
+				}
+			}
 		}
+		
 	}
 }
 
@@ -34,19 +46,21 @@ void UFiniteStateMachineComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	for (TSubclassOf<UFiniteStateMachineTaskBase> Task : AllowedTasks)
-	{
-		UFiniteStateMachineTaskBase* TaskPtr = NewObject<UFiniteStateMachineTaskBase>(this, Task.Get());
-		Tasks.Add(Task.Get(), TaskPtr);
-	}
+	AbilitySystemComponent = GetOwner()->GetComponentByClass<UAbilitySystemComponent>();
 
-	for (TSubclassOf<UFiniteStateMachineConditionBase> Condition : AllowedConditions)
+	if (AbilitySystemComponent)
 	{
-		UFiniteStateMachineConditionBase* ConditionPtr = NewObject<UFiniteStateMachineConditionBase>(this, Condition.Get());
-		Conditions.Add(Condition.Get(), ConditionPtr);
+		if (AbilitySystemComponent->TryActivateAbilityByClass(StartTask, false))
+		{
+			for (auto ActivatableAbility : AbilitySystemComponent->GetActivatableAbilities())
+			{
+				if (ActivatableAbility.Ability == StartTask.GetDefaultObject())
+				{
+					CurrentTask = Cast<UFiniteStateMachineTaskBase>(ActivatableAbility.Ability);
+					break;
+				}
+			}
+		}
 	}
-
-	CurrentTask = Tasks.FindRef(RootTask.Get());
-	CurrentTask->RunLogic();
 }
 
