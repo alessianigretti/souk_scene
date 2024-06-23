@@ -10,12 +10,15 @@ UFiniteStateMachineTaskBase::UFiniteStateMachineTaskBase()
 
 void UFiniteStateMachineTaskBase::RunLogic_Implementation()
 {
+	bIsRunning = true;
+
 	if (GEngine)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Yellow, GetName());
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, GetName());
 	}
 }
 
 void UFiniteStateMachineTaskBase::EndTask_Implementation()
 {
+	bIsRunning = false;
 }

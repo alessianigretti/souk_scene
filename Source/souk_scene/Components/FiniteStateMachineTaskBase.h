@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTask.h"
 #include "FiniteStateMachineTaskBase.generated.h"
 
 class UFiniteStateMachineConditionBase;
@@ -19,11 +20,11 @@ public:
 
 	UFiniteStateMachineTaskBase();
 
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void RunLogic();
 	virtual void RunLogic_Implementation();
 
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void EndTask();
 	virtual void EndTask_Implementation();
 
@@ -32,4 +33,7 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	AActor* Owner;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool bIsRunning;
 };

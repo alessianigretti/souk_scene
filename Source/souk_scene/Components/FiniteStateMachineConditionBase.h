@@ -19,7 +19,7 @@ public:
 
 	UFiniteStateMachineConditionBase();
 
-	UFUNCTION(BlueprintNativeEvent)
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	bool IsConditionMet();
 	virtual bool IsConditionMet_Implementation();
 

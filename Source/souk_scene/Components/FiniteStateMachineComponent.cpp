@@ -13,12 +13,16 @@ void UFiniteStateMachineComponent::TickComponent(float DeltaTime, ELevelTick Tic
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (CurrentTask->bIsRunning)
+	{
+		return;
+	}
+
 	for (int i = 0; i < CurrentTask->Conditions.Num(); i++)
 	{
 		UFiniteStateMachineConditionBase* ConditionPtr = Conditions.FindRef(CurrentTask->Conditions[i].Get());
-		if (ConditionPtr->IsConditionMet())
+		if (ConditionPtr->IsConditionMet() && ConditionPtr->Task.Get() != CurrentTask->GetClass())
 		{
-			CurrentTask->EndTask();
 			CurrentTask = Tasks.FindRef(ConditionPtr->Task.Get());
 			CurrentTask->RunLogic();
 			break;
