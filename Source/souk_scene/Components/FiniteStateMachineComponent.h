@@ -32,18 +32,21 @@ public:
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UFUNCTION()
+	void InjectIntoCurrentTask();
+
 	UPROPERTY(EditAnywhere)
 	TMap<TSubclassOf<UFiniteStateMachineTaskBase>, FLinkedTasks> Graph;
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UFiniteStateMachineTaskBase> StartTask;
 
+	UPROPERTY(BlueprintReadOnly)
+	UFiniteStateMachineTaskBase* CurrentTask;
+
 protected:
 
 	virtual void BeginPlay() override;
-
-	UPROPERTY()
-	UFiniteStateMachineTaskBase* CurrentTask;
 
 private:
 

@@ -14,7 +14,13 @@ void UFiniteStateMachineComponent::TickComponent(float DeltaTime, ELevelTick Tic
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	if (!CurrentTask || CurrentTask->IsActive())
+	if (!CurrentTask)
+	{
+		return;
+	}
+
+	// Has not yet ended and also cannot be interrupted
+	if (!CurrentTask->bCanBeInterrupted && !CurrentTask->bHasEnded)
 	{
 		return;
 	}
@@ -23,23 +29,31 @@ void UFiniteStateMachineComponent::TickComponent(float DeltaTime, ELevelTick Tic
 
 	for (int i = 0; i < LinkedTasks.Num(); i++)
 	{
-		for (auto ActivatableAbility : AbilitySystemComponent->GetActivatableAbilities())
+		FGameplayAbilitySpec* ActivatableSpec = AbilitySystemComponent->FindAbilitySpecFromClass(LinkedTasks[i]);
+		if (ActivatableSpec->Ability->CanActivateAbility(ActivatableSpec->Handle, AbilitySystemComponent->AbilityActorInfo.Get())
+			&& ActivatableSpec->Ability->GetClass() != CurrentTask->GetClass())
 		{
-			if (ActivatableAbility.Ability == LinkedTasks[i].GetDefaultObject())
+			// Has not called OnEndAbility yet
+			if (!CurrentTask->bHasEnded && !CurrentTask->IsActive())
 			{
-				if (ActivatableAbility.Ability->CanActivateAbility(ActivatableAbility.Handle, AbilitySystemComponent->AbilityActorInfo.Get())
-					&& ActivatableAbility.Ability->GetClass() != CurrentTask->GetClass())
-				{
-					if (AbilitySystemComponent->TryActivateAbilityByClass(LinkedTasks[i], false))
-					{
-						CurrentTask = Cast<UFiniteStateMachineTaskBase>(ActivatableAbility.Ability);
-						break;
-					}
-				}
+				FGameplayAbilitySpec* EndingAbilitySpec = AbilitySystemComponent->FindAbilitySpecFromClass(CurrentTask->GetClass());
+				UFiniteStateMachineTaskBase* EndingTask = Cast<UFiniteStateMachineTaskBase>(EndingAbilitySpec->Ability.Get());
+				EndingTask->EndAbility(EndingAbilitySpec->Handle, AbilitySystemComponent->AbilityActorInfo.Get(), EndingAbilitySpec->ActivationInfo, false, true);
+			}
+
+			// Has called OnEndAbility and we're waiting for it to complete
+			if (CurrentTask->bHasEnded && AbilitySystemComponent->TryActivateAbilityByClass(LinkedTasks[i], false))
+			{
+				CurrentTask = Cast<UFiniteStateMachineTaskBase>(ActivatableSpec->GetPrimaryInstance());
+				break;
 			}
 		}
-		
 	}
+}
+
+void UFiniteStateMachineComponent::InjectIntoCurrentTask()
+{
+	CurrentTask->OnStateInjected.Broadcast();
 }
 
 void UFiniteStateMachineComponent::BeginPlay()
@@ -52,14 +66,8 @@ void UFiniteStateMachineComponent::BeginPlay()
 	{
 		if (AbilitySystemComponent->TryActivateAbilityByClass(StartTask, false))
 		{
-			for (auto ActivatableAbility : AbilitySystemComponent->GetActivatableAbilities())
-			{
-				if (ActivatableAbility.Ability == StartTask.GetDefaultObject())
-				{
-					CurrentTask = Cast<UFiniteStateMachineTaskBase>(ActivatableAbility.Ability);
-					break;
-				}
-			}
+			FGameplayAbilitySpec* ActivatableSpec = AbilitySystemComponent->FindAbilitySpecFromClass(StartTask);
+			CurrentTask = Cast<UFiniteStateMachineTaskBase>(ActivatableSpec->GetPrimaryInstance());
 		}
 	}
 }

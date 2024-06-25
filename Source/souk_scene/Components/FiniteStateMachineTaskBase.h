@@ -20,7 +20,21 @@ public:
 
 	UFiniteStateMachineTaskBase();
 
-protected:
+	UFUNCTION(BlueprintCallable)
+	void InjectTarget(APawn* Target);
+
+	UPROPERTY(BlueprintReadOnly)
+	APawn* Pawn;
+
+	UPROPERTY(BlueprintReadOnly, EditAnywhere)
+	bool bCanBeInterrupted;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bHasEnded;
+
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStateInjectedDelegate);
+	UPROPERTY(BlueprintAssignable)
+	FOnStateInjectedDelegate OnStateInjected;
 
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData) override;
 
