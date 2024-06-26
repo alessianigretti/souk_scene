@@ -20,8 +20,9 @@ public:
 
 	UFiniteStateMachineTaskBase();
 
+	// Returns interrupted task class if successful
 	UFUNCTION(BlueprintCallable)
-	void InjectTarget(APawn* Target);
+	TSubclassOf<UFiniteStateMachineTaskBase> InjectTarget(APawn* Target);
 
 	UPROPERTY(BlueprintReadOnly)
 	APawn* Pawn;
@@ -32,7 +33,7 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	bool bHasEnded;
 
-	DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnStateInjectedDelegate);
+	DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnStateInjectedDelegate, TSubclassOf<UFiniteStateMachineTaskBase>, Class);
 	UPROPERTY(BlueprintAssignable)
 	FOnStateInjectedDelegate OnStateInjected;
 

@@ -9,9 +9,16 @@ UFiniteStateMachineTaskBase::UFiniteStateMachineTaskBase()
 	InstancingPolicy = EGameplayAbilityInstancingPolicy::InstancedPerActor;
 }
 
-void UFiniteStateMachineTaskBase::InjectTarget(APawn* Target)
+TSubclassOf<UFiniteStateMachineTaskBase> UFiniteStateMachineTaskBase::InjectTarget(APawn* Target)
 {
-	Target->GetComponentByClass<UFiniteStateMachineComponent>()->InjectIntoCurrentTask();
+	if (Target != nullptr)
+	{
+		UFiniteStateMachineComponent* FiniteStateMachineComponent = Target->GetComponentByClass<UFiniteStateMachineComponent>();
+		FiniteStateMachineComponent->InjectIntoCurrentTask(GetClass());
+		return FiniteStateMachineComponent->CurrentTask->GetClass();
+	}
+
+	return nullptr;
 }
 
 void UFiniteStateMachineTaskBase::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo, const FGameplayEventData* TriggerEventData)
@@ -19,7 +26,7 @@ void UFiniteStateMachineTaskBase::ActivateAbility(const FGameplayAbilitySpecHand
 	if (GEngine)
 	{
 		FString Msg = ActorInfo->AvatarActor->GetName().Append(": ").Append(GetName());
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, Msg);
+		//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, Msg);
 	}
 
 	Pawn = Cast<APawn>(ActorInfo->AvatarActor);

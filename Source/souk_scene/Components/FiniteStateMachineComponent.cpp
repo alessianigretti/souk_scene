@@ -30,8 +30,7 @@ void UFiniteStateMachineComponent::TickComponent(float DeltaTime, ELevelTick Tic
 	for (int i = 0; i < LinkedTasks.Num(); i++)
 	{
 		FGameplayAbilitySpec* ActivatableSpec = AbilitySystemComponent->FindAbilitySpecFromClass(LinkedTasks[i]);
-		if (ActivatableSpec->Ability->CanActivateAbility(ActivatableSpec->Handle, AbilitySystemComponent->AbilityActorInfo.Get())
-			&& ActivatableSpec->Ability->GetClass() != CurrentTask->GetClass())
+		if (ActivatableSpec->Ability->CanActivateAbility(ActivatableSpec->Handle, AbilitySystemComponent->AbilityActorInfo.Get()))
 		{
 			// Has not called OnEndAbility yet
 			if (!CurrentTask->bHasEnded && !CurrentTask->IsActive())
@@ -51,9 +50,15 @@ void UFiniteStateMachineComponent::TickComponent(float DeltaTime, ELevelTick Tic
 	}
 }
 
-void UFiniteStateMachineComponent::InjectIntoCurrentTask()
+void UFiniteStateMachineComponent::InjectIntoCurrentTask(TSubclassOf<UFiniteStateMachineTaskBase> Task)
 {
-	CurrentTask->OnStateInjected.Broadcast();
+	if (GEngine)
+	{
+		FString Msg = Task.Get()->GetName().Append(" injecting into ").Append(CurrentTask->GetClass()->GetName());
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::White, Msg);
+	}
+
+	CurrentTask->OnStateInjected.Broadcast(Task);
 }
 
 void UFiniteStateMachineComponent::BeginPlay()

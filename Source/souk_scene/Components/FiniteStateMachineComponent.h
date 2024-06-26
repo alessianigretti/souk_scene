@@ -33,7 +33,7 @@ public:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	UFUNCTION()
-	void InjectIntoCurrentTask();
+	void InjectIntoCurrentTask(TSubclassOf<UFiniteStateMachineTaskBase> Task);
 
 	UPROPERTY(EditAnywhere)
 	TMap<TSubclassOf<UFiniteStateMachineTaskBase>, FLinkedTasks> Graph;
