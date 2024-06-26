@@ -1,11 +1,13 @@
 # souk_scene
-Small densely populated market scene with customer/merchant interactions featuring FSMs, Perception System and GAS
+WIP small densely populated market scene with customer/merchant interactions featuring FSMs, Perception System and GAS
 
 https://github.com/alessianigretti/souk_scene/assets/17513294/7df3d865-9fc7-47f3-a607-59de8e8a4c78
 
 Features:
 - Finite State Machine x2 (Customer and Merchant)
+  - https://github.com/alessianigretti/souk_scene/blob/main/Source/souk_scene/Components/FiniteStateMachineComponent.cpp
 - States implemented as Gameplay Ability (GAS)
+  - https://github.com/alessianigretti/souk_scene/blob/main/Source/souk_scene/Components/FiniteStateMachineTaskBase.h
 - State interruption configurability
 - State injection into other states
 - Syncing between the two FSMs
